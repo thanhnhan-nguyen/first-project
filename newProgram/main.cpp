@@ -11,94 +11,100 @@ void gotoxy(int x, int y)
   SetConsoleCursorPosition(h,c);
 }
 
+
+
 int main() 
-{
-	int lengMap = 5;
-	int highMap = 3;
-	
-	struct Ctrl
+{	
+	struct Control_cursor
 	{
 		int x, y;
-	} ctrl, before, after, listGo[20];
+	} control_cursor, cursorAfterMove, listOfMoves[100] = {0};
 	
-	int arrMap[3][5] = {
+	int arrMap[5][5] = {
 	{0,0,0,0,0},
-	{0,0,0,1,2},
+	{1,0,0,1,2},
+	{0,0,0,0,1},
+	{0,0,0,0,0},
 	{0,0,0,0,0}
 	};
 	
-	ctrl.x = 4;
-	ctrl.y = 1;
-	int countGo = 0;
-	listGo[0].x = ctrl.x;
-	listGo[0].y = ctrl.y;
+	int lengMap = 5;
+	int widthMap = 5;
+	int numberOfStep = 0;
+	
+	control_cursor.x = 4;
+	control_cursor.y = 1;
+	listOfMoves[0].x = control_cursor.x;
+	listOfMoves[0].y = control_cursor.y;
 	
 	while(1)
 	{	
 		
 		system("cls");
 		
-		int dx = 0;
-		int dy = 0;
+		int direct_X = 0;
+		int direct_Y = 0;
 		
-		if (GetAsyncKeyState(VK_RIGHT)) dx = 1;
-		if (GetAsyncKeyState(VK_LEFT)) dx = -1;
-		if (GetAsyncKeyState(VK_DOWN)) dy = 1;
-		if (GetAsyncKeyState(VK_UP)) dy = -1;
+		if (GetAsyncKeyState(VK_RIGHT)) direct_X = 1;
+		if (GetAsyncKeyState(VK_LEFT)) direct_X = -1;
+		if (GetAsyncKeyState(VK_DOWN)) direct_Y = 1;
+		if (GetAsyncKeyState(VK_UP)) direct_Y = -1;
 		
-		if (arrMap[ctrl.y+dy][ctrl.x+dx] == 0)
+		cursorAfterMove.x = control_cursor.x + direct_X;
+		cursorAfterMove.y = control_cursor.y + direct_Y;
+		
+		if (arrMap[cursorAfterMove.y][cursorAfterMove.x] == 0)
 		{
-			countGo++;
-			listGo[countGo].x = ctrl.x + dx;
-			listGo[countGo].y = ctrl.y + dy;
-			ctrl.x += dx;
-			ctrl.y += dy;
-			arrMap[ctrl.y][ctrl.x] = 2;
+			arrMap[cursorAfterMove.y][cursorAfterMove.x] = 2;
+			numberOfStep++;
+			listOfMoves[numberOfStep].x = cursorAfterMove.x;
+			listOfMoves[numberOfStep].y = cursorAfterMove.y;
+			control_cursor.x = cursorAfterMove.x;
+			control_cursor.y = cursorAfterMove.y;
 		}
 		
-		bool testGo = 0;
-		for (int i = 0; i < countGo; i++)
-		if (ctrl.x + dx == listGo[i].x)
-		if (ctrl.y + dy == listGo[i].y)
+		for (int i = 0; i < numberOfStep; i++)
+		if (cursorAfterMove.x == listOfMoves[i].x)
+		if (cursorAfterMove.y == listOfMoves[i].y)
 		{	
-			for (int j = countGo; j > i; j--)
+			for (int j = numberOfStep; j > i; j--)
 			{
-				arrMap[listGo[j].y][listGo[j].x] = 0;
-				listGo[j].x = 0;
-				listGo[j].y = 0;
+				arrMap[listOfMoves[j].y][listOfMoves[j].x] = 0;
+				listOfMoves[j].x = 0;
+				listOfMoves[j].y = 0;
 			}
-			countGo = i;	
-			ctrl.x += dx;
-			ctrl.y += dy;
+			numberOfStep = i;	
+			control_cursor.x += direct_X;
+			control_cursor.y += direct_Y;
 			break;
 		}
 		
-		for (int i=0; i<countGo; i++)
-		{
-			gotoxy(20, i);
-			cout << listGo[i].x << " " << listGo[i].y;
-		}
+		bool win = true;
 		
-		bool test = 1;
 		for (int i = 0; i < lengMap; i++)
-		for (int j = 0; j < highMap; j++)
-		if (arrMap[j][i] == 0) test = 0;
+		for (int j = 0; j < widthMap; j++)
+		if (arrMap[j][i] == 0) win = false;
 		
-		gotoxy(1,15);
-		cout << "test = " << test ;
-		
-		for (int i=0; i<lengMap; i++)
-		for (int j=0; j<highMap; j++)
+		for (int i = 0; i < lengMap; i++)
+		for (int j = 0; j < widthMap; j++)
 		{
 			gotoxy(i * 2, j);
 			cout << arrMap[j][i];
 		}
 		
-		gotoxy(ctrl.x*2, ctrl.y);
+		gotoxy(control_cursor.x*2, control_cursor.y);
 		cout << "[]";
 		
 		gotoxy(1,15);
+		
+		if (win) break;
+		
 		Sleep(100);
 	}
+	
+	system("cls");
+	gotoxy(5,5);
+	cout << "YOU WIN!";
+	
 	return 0;
 }
